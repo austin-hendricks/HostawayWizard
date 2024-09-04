@@ -1,0 +1,36 @@
+# Python-related
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+*.env
+
+# Database files
+*.sqlite3
+
+# IDE-related
+.idea/
+.vscode/
+.DS_Store
+
+# OS-related
+Thumbs.db
+
+# Other
+tree.txt
+GPT_Analysis.md
