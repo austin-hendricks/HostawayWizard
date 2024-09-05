@@ -58,7 +58,7 @@ def receive_hostaway_webhook():
         jsonify(
             {
                 "status": "success",
-                "message": "Webhook received successfully",
+                "message": "Webhook data received successfully",
             }
         ),
         200,

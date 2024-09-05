@@ -14,13 +14,15 @@ def message_channel(message, channel_id=SLACK_WEBHOOK_CHANNEL_ID):
 
     if not SLACK_BOT_TOKEN:
         logger.log_error(
-            "Slack bot token not found. Please set the SLACK_BOT_TOKEN environment variable."
+            "Slack bot token not found. Please set the SLACK_BOT_TOKEN environment variable.",
+            logger="slack",
         )
         return
 
     if not channel_id:
         logger.log_error(
-            "Slack channel ID not found. Please set the SLACK_WEBHOOK_CHANNEL_ID environment variable or provide a valid channel ID."
+            "Slack channel ID not found. Please set the SLACK_WEBHOOK_CHANNEL_ID environment variable or provide a valid channel ID.",
+            logger="slack",
         )
         return
 
@@ -36,6 +38,6 @@ def message_channel(message, channel_id=SLACK_WEBHOOK_CHANNEL_ID):
 
     # Log the response from Slack
     if response.status_code == 200 and response.json().get("ok"):
-        logger.log_inform(f"Message sent to Slack channel {channel_id}")
+        logger.log_inform(f"Message sent to Slack channel {channel_id}", logger="slack")
     else:
-        logger.log_error(f"Failed to send message: {response.text}")
+        logger.log_error(f"Failed to send message: {response.text}", logger="slack")

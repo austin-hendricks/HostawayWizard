@@ -30,7 +30,7 @@ def create_task(data):
     except IntegrityError as ie:
         db.session.rollback()
         if isinstance(ie.orig, UniqueViolation):
-            notifier.warn(f"Duplicate task creation: {data}")
+            notifier.warn(f"Duplicate task creation for Task ID: {task_id}")
         else:
             raise  # Re-raise the exception if it's not a unique constraint violation
 

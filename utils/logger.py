@@ -3,85 +3,47 @@ from logging.handlers import RotatingFileHandler
 
 
 def setup_logging():
-    # Setup logging configurations
-    # General logger for basic updates
-    general_handler = RotatingFileHandler(
-        "logs/general.log", maxBytes=100000, backupCount=5
-    )
-    general_handler.setLevel(logging.INFO)
-    general_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    general_handler.setFormatter(general_formatter)
+    """Initializes the logging system."""
 
-    # Logger for warnings
-    warning_handler = RotatingFileHandler(
-        "logs/warnings.log", maxBytes=100000, backupCount=5
-    )
-    warning_handler.setLevel(logging.WARNING)
-    warning_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    warning_handler.setFormatter(warning_formatter)
+    # Standard loggers
+    __initialize_logger("general", level=logging.INFO)
+    __initialize_logger("errors", level=logging.ERROR)
+    __initialize_logger("warnings", level=logging.WARNING)
 
-    # Logger for errors
-    error_handler = RotatingFileHandler(
-        "logs/errors.log", maxBytes=100000, backupCount=5
-    )
-    error_handler.setLevel(logging.ERROR)
-    error_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    error_handler.setFormatter(error_formatter)
-
-    # Logger for tasks
-    task_handler = RotatingFileHandler(
-        "logs/hostaway_tasks.log", maxBytes=100000, backupCount=5
-    )
-    task_handler.setLevel(logging.INFO)
-    task_formatter = logging.Formatter("%(asctime)s - %(message)s")
-    task_handler.setFormatter(task_formatter)
-
-    # Logger for messages
-    message_handler = RotatingFileHandler(
-        "logs/hostaway_conversation_messages.log", maxBytes=100000, backupCount=5
-    )
-    message_handler.setLevel(logging.INFO)
-    message_formatter = logging.Formatter("%(asctime)s - %(message)s")
-    message_handler.setFormatter(message_formatter)
-
-    # Logger for reservations
-    reservation_handler = RotatingFileHandler(
-        "logs/hostaway_reservations.log", maxBytes=100000, backupCount=5
-    )
-    reservation_handler.setLevel(logging.INFO)
-    reservation_formatter = logging.Formatter("%(asctime)s - %(message)s")
-    reservation_handler.setFormatter(reservation_formatter)
-
-    # Assign handlers to specific loggers
-    logging.getLogger("general").addHandler(general_handler)
-    logging.getLogger("warning").addHandler(warning_handler)
-    logging.getLogger("error").addHandler(error_handler)
-    logging.getLogger("task").addHandler(task_handler)
-    logging.getLogger("conversationMessage").addHandler(message_handler)
-    logging.getLogger("reservation").addHandler(reservation_handler)
-
-    # Set the level for all loggers
-    logging.getLogger("general").setLevel(logging.INFO)
-    logging.getLogger("warning").setLevel(logging.WARNING)
-    logging.getLogger("error").setLevel(logging.ERROR)
-    logging.getLogger("task").setLevel(logging.INFO)
-    logging.getLogger("conversationMessage").setLevel(logging.INFO)
-    logging.getLogger("reservation").setLevel(logging.INFO)
+    # Slack loggers
+    __initialize_logger("slack", level=logging.INFO)
 
 
 def log_inform(message, logger="general"):
     logging.getLogger(logger).info(message)
 
 
-def log_warning(message):
-    logging.getLogger("general").info(
+def log_warning(message, logger="general"):
+    logging.getLogger(logger).info(
         "Warning issued, see 'Warnings' log for details: https://gibbon-game-eagle.ngrok-free.app/logs/warnings"
     )
-    logging.getLogger("warning").warning(message)
+    logging.getLogger("warnings").warning(message)
 
 
-def log_error(message):
-    logging.getLogger("general").info(
+def log_error(message, logger="general"):
+    logging.getLogger(logger).info(
         "Error issued, see 'Errors' log for details: https://gibbon-game-eagle.ngrok-free.app/logs/errors"
     )
-    logging.getLogger("error").error(message)
+    logging.getLogger("errors").error(message)
+
+
+def __initialize_logger(logger_reference, fname=None, level=logging.INFO):
+    """Initializes a new logger with the specified name and level."""
+
+    if fname is None:
+        fname = logger_reference
+
+    log_handler = RotatingFileHandler(
+        f"logs/{fname}.log", maxBytes=100000, backupCount=5
+    )
+    log_handler.setLevel(level)
+    log_formatter = logging.Formatter("%(asctime)s - %(message)s")
+    log_handler.setFormatter(log_formatter)
+
+    logging.getLogger(logger_reference).addHandler(log_handler)
+    logging.getLogger(logger_reference).setLevel(level)

@@ -7,7 +7,7 @@ def handle_command(command, request_data):
     # Validate the request and extract sanitized user text
     isValid, text = validator.validate_and_sanitize_slack_input(request_data)
     if not isValid:
-        logger.log_error(text)
+        logger.log_error(text, logger="slack")
         slackbot.message_channel(text, channel_id=request_data["channel_id"])
         return
 
@@ -20,8 +20,9 @@ def __slash_speak(channel_id, sanitised_user_text):
     """Handles the /speak command"""
 
     # Log the incoming slash command details
-    logger.logging.getLogger("general").info(
-        f"Received /speak command in channel {channel_id} with sanitized text: '{sanitised_user_text}'"
+    logger.log_inform(
+        f"Received /speak command in channel {channel_id} with sanitized text: '{sanitised_user_text}'",
+        logger="slack",
     )
 
     # Use the Slack API to send a message to the channel

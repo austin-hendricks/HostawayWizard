@@ -1,7 +1,7 @@
 from threading import Thread
 
+from utils import notifier
 from workers.jobs import hostaway_webhook_queue
-from utils import logger, notifier
 from handlers import hostaway_event_handler
 
 
@@ -22,9 +22,6 @@ def worker(app):
                 # Extract the relevant fields from the webhook payload
                 object_type = payload["object"]
                 event_type = payload["event"]
-
-                # Log payload to specific logger
-                logger.log_inform(payload, logger=object_type)
 
                 # Send to Hostaway event handler
                 hostaway_event_handler.handle_event(object_type, event_type, payload)

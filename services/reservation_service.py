@@ -29,7 +29,9 @@ def create_reservation(data):
     except IntegrityError as ie:
         db.session.rollback()
         if isinstance(ie.orig, UniqueViolation):
-            notifier.warn(f"Duplicate reservation creation: {data}")
+            notifier.warn(
+                f"Duplicate reservation creation for Reservation ID: {reservation_id}"
+            )
         else:
             raise  # Re-raise the exception if it's not a unique constraint violation
 
