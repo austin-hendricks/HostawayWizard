@@ -1,5 +1,8 @@
+import re
+import bleach
 from sqlalchemy.types import Integer, String, Boolean
 from sqlalchemy import inspect
+
 import models
 
 # Define valid events for each object type
@@ -12,8 +15,40 @@ VALID_HOSTAWAY_EVENTS = {
 HOSTAWAY_ACCOUNT_ID = 82130
 
 
-def validate_webhook_payload(payload):
-    """Validates a Hostaway webhook payload."""
+def validate_and_sanitize_slack_input(request_data):
+    """
+    Validates and sanitizes Slack input.
+    Returns a tuple of (success[bool], message[str]).
+    If success is False, message is an error message.
+    If success is True, message is the sanitized user input.
+    """
+
+    user_text = request_data.get("text", "")
+    channel_id = request_data.get("channel_id")
+
+    # Validate channel ID and presence of user input
+    if not user_text:
+        return False, "Empty user input. Please provide a valid input."
+    if not channel_id or not re.match(r"^\S{1,256}$", channel_id):
+        return False, "Invalid channel ID"
+
+    # Sanitize user input using bleach
+    sanitized_text = bleach.clean(user_text)
+
+    # Further validation checks on the sanitized input
+    if len(sanitized_text) > 200:  # Limit to a reasonable length
+        return False, "Input text is too long. Limit to 200 characters."
+    if not sanitized_text:  # Check if text is empty after sanitization
+        return False, "Empty or invalid input. Please provide a valid input."
+
+    return True, sanitized_text
+
+
+def validate_hostaway_webhook_payload(payload):
+    """
+    Validates a Hostaway webhook payload.
+    Returns a tuple of (success[bool], message[str]).
+    """
     # Validate structure
     if not payload:
         return False, "Invalid data format"
@@ -39,7 +74,7 @@ def validate_webhook_payload(payload):
         return False, f"Invalid event for {payload['object']}: {payload['event']}"
 
     # Validate data against models
-    isValidAgainstModel, msg = validate_against_model(
+    isValidAgainstModel, msg = __validate_hostaway_payload_against_model(
         payload["data"], payload["object"]
     )
     if not isValidAgainstModel:
@@ -48,7 +83,7 @@ def validate_webhook_payload(payload):
     return True, "Valid payload"
 
 
-def validate_against_model(data, object_type):
+def __validate_hostaway_payload_against_model(data, object_type):
     """
     Validates that the data dictionary has the correct types and required fields
     according to the SQLAlchemy model.

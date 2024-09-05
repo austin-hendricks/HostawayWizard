@@ -20,7 +20,7 @@ def message_channel(message, channel_id=SLACK_WEBHOOK_CHANNEL_ID):
 
     if not channel_id:
         logger.log_error(
-            "Slack channel ID not found. Please set the SLACK_WEBHOOK_CHANNEL_ID environment variable."
+            "Slack channel ID not found. Please set the SLACK_WEBHOOK_CHANNEL_ID environment variable or provide a valid channel ID."
         )
         return
 

@@ -9,8 +9,7 @@ load_dotenv()
 from db import db
 from config import Config
 from utils import logger, notifier, validator
-from workers import jobs, webhook_processor
-from handlers import slack_command_handler
+from workers import jobs, hostaway_webhook_processor, slack_command_processor
 
 
 app = Flask(__name__)
@@ -27,8 +26,9 @@ migrate = Migrate(app, db)
 # Setup Logging
 logger.setup_logging()
 
-# Start Worker thread to process Hostaway webhooks
-webhook_processor.start_worker(app)
+# Start Worker threads for asynchronous data processing
+hostaway_webhook_processor.start_worker(app)
+slack_command_processor.start_worker(app)
 
 
 @app.route("/")
@@ -47,7 +47,7 @@ def receive_hostaway_webhook():
         notifier.inform(f"Data received from Hostaway webhook!")
 
         # Validate the webhook payload
-        isValid, msg = validator.validate_webhook_payload(data)
+        isValid, msg = validator.validate_hostaway_webhook_payload(data)
         if not isValid:
             return jsonify({"status": "error", "message": msg}), 400
 
@@ -75,8 +75,8 @@ def receive_hostaway_webhook():
 
 @app.route("/slack/slash/<command>", methods=["POST"])
 def receive_slack_command(command):
-    # Handle the slash command
-    slack_command_handler.handle_slack_command(command, request)
+    # Send payload to Slack Slash Command job queue
+    jobs.slack_command_queue.put((command, request.form))
 
     # Respond back to Slack immediately
     return jsonify({"response_type": "ephemeral", "text": "Message is being sent!"})
