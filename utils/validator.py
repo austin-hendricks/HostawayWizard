@@ -1,3 +1,4 @@
+import os
 import re
 import bleach
 from sqlalchemy.types import Integer, String, Boolean
@@ -5,14 +6,14 @@ from sqlalchemy import inspect
 
 import models
 
+HOSTAWAY_ACCOUNT_ID = os.getenv("HOSTAWAY_ACCOUNT_ID")
+
 # Define valid events for each object type
 VALID_HOSTAWAY_EVENTS = {
     "task": ["task.created", "task.updated"],
     "conversationMessage": ["message.received"],
     "reservation": ["reservation.created", "reservation.updated"],
 }
-
-HOSTAWAY_ACCOUNT_ID = 82130
 
 
 def validate_and_sanitize_slack_input(request_data):
@@ -66,8 +67,8 @@ def validate_hostaway_webhook_payload(payload):
         return False, "Invalid data format"
 
     # Validate content
-    if payload["accountId"] != HOSTAWAY_ACCOUNT_ID:
-        return False, "Invalid account ID"
+    if str(payload["accountId"]) != str(HOSTAWAY_ACCOUNT_ID):
+        return (False, "Invalid account ID")
     if payload["object"] not in VALID_HOSTAWAY_EVENTS:
         return False, f"Invalid object type: {payload['object']}"
     if payload["event"] not in VALID_HOSTAWAY_EVENTS[payload["object"]]:

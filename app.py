@@ -8,7 +8,7 @@ load_dotenv()
 
 from db import db
 from config import Config
-from utils import logger, notifier, validator
+from utils import logger, notifier
 from workers import jobs, hostaway_webhook_processor, slack_command_processor
 
 
@@ -39,6 +39,17 @@ def home():
 # Webhook endpoint to receive Hostaway events
 @app.route("/hostaway/webhook", methods=["POST"])
 def receive_hostaway_webhook():
+    if not request.is_json:
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": "Invalid request. Expected a JSON payload.",
+                }
+            ),
+            400,
+        )
+
     # Send payload to Hostaway Webhook job queue
     jobs.hostaway_webhook_queue.put(request.json)
 

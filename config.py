@@ -2,7 +2,5 @@ import os
 
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URI", "postgresql://austin:password@localhost/hostaway_webhooks"
-    )
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
