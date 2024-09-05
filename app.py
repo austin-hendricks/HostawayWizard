@@ -39,38 +39,19 @@ def home():
 # Webhook endpoint to receive Hostaway events
 @app.route("/hostaway/webhook", methods=["POST"])
 def receive_hostaway_webhook():
-    try:
-        # Extract the webhook payload
-        data = request.json
+    # Send payload to Hostaway Webhook job queue
+    jobs.hostaway_webhook_queue.put(request.json)
 
-        # Log the webhook event
-        notifier.inform(f"Data received from Hostaway webhook!")
-
-        # Validate the webhook payload
-        isValid, msg = validator.validate_hostaway_webhook_payload(data)
-        if not isValid:
-            return jsonify({"status": "error", "message": msg}), 400
-
-        # Send payload to Hostaway Webhook job queue
-        jobs.hostaway_webhook_queue.put(data)
-
-        # Return a success response
-        return (
-            jsonify(
-                {
-                    "status": "success",
-                    "message": "Webhook received successfully",
-                }
-            ),
-            200,
-        )
-
-    except Exception as e:
-        # Handle any errors that occur
-        notifier.error(
-            f"Returned 500 - Unexpected error receiving Hostaway webhook: {str(e)}"
-        )
-        return jsonify({"status": "error", "message": str(e)}), 500
+    # Return a success response to Hostaway
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Webhook received successfully",
+            }
+        ),
+        200,
+    )
 
 
 @app.route("/slack/slash/<command>", methods=["POST"])

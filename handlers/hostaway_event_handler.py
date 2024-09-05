@@ -1,9 +1,19 @@
 from services import task_service, reservation_service, message_service
+from utils import notifier, validator
 
 
 def handle_event(object_type, event_type, data):
     """Handles Hostaway events"""
+    # Log the webhook event
+    notifier.inform(f"Data received from Hostaway webhook!")
 
+    # Validate the webhook payload
+    isValid, msg = validator.validate_hostaway_webhook_payload(data)
+    if not isValid:
+        notifier.error(msg)
+        return
+
+    # Dispatch the event to the appropriate handler function
     if object_type == "task":
         __handle_task_event(event_type, data)
 
