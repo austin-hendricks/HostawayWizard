@@ -8,8 +8,9 @@ load_dotenv()
 
 from db import db
 from config import Config
-from utils import logger, notifier, validator, slack
+from utils import logger, notifier, validator
 from workers import jobs, webhook_processor
+from handlers import slack_command_handler
 
 
 app = Flask(__name__)
@@ -72,21 +73,10 @@ def receive_hostaway_webhook():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-@app.route("/slack/slash/speak", methods=["POST"])
-def slack_speak():
-    # Extract the payload from the Slack command
-    user_text = request.form.get("text")
-    channel_id = request.form.get("channel_id")
-
-    # Log the incoming slash command details
-    logger.logging.getLogger("general").info(
-        f"Received /speak command with text: {user_text} in channel: {channel_id}"
-    )
-
-    # Use the Slack API to send a message to the channel
-    slack.message_channel(
-        f'"{user_text}" is such a silly thing to say!', channel_id=channel_id
-    )
+@app.route("/slack/slash/<command>", methods=["POST"])
+def receive_slack_command(command):
+    # Handle the slash command
+    slack_command_handler.handle_slack_command(command, request)
 
     # Respond back to Slack immediately
     return jsonify({"response_type": "ephemeral", "text": "Message is being sent!"})
