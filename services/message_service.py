@@ -6,13 +6,13 @@ import models
 from utils import notifier
 
 
-def create_conversation_message(data):
+def create_conversation_message(message_obj):
     """Creates a new conversationMessage in the database"""
-    message_id = data["data"]["id"]
+    message_id = message_obj["id"]
 
     # Create or update the conversation message
-    conversation_id = data["data"]["conversationId"]
-    reservation_id = data["data"].get("reservationId")
+    conversation_id = message_obj["conversationId"]
+    reservation_id = message_obj["reservationId"]
 
     # Ensure the conversation exists
     conversation = db.session.get(models.Conversation, conversation_id)
@@ -30,7 +30,7 @@ def create_conversation_message(data):
 
     # Filter conversationMessage data to include only valid fields
     filtered_conversationMessage_data = {
-        key: value for key, value in data["data"].items() if key in valid_columns
+        key: value for key, value in message_obj.items() if key in valid_columns
     }
 
     try:
@@ -40,12 +40,14 @@ def create_conversation_message(data):
         )
         db.session.add(conversation_message)
         db.session.commit()
-        notifier.inform(f"ConversationMessage received with ID: {message_id}")
+        notifier.inform(
+            f"ConversationMessage received associated with Reservation {reservation_id}"
+        )
     except IntegrityError as ie:
         db.session.rollback()
         if isinstance(ie.orig, UniqueViolation):
             notifier.warn(
-                f"Duplicate conversationMessage received. Duplicated ID: {message_id}"
+                f"Duplicate conversationMessage received for Reservation {reservation_id}. Duplicated conversationMessage ID: {message_id}"
             )
         else:
             raise  # Re-raise the exception if it's not a unique constraint violation

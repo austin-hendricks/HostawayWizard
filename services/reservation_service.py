@@ -8,16 +8,16 @@ import models
 from utils import notifier
 
 
-def create_reservation(data):
+def create_reservation(reservation_obj):
     """Creates a new reservation in the database"""
-    reservation_id = data["data"]["id"]
+    reservation_id = reservation_obj["id"]
 
     # Get a list of valid columns for the Reservation model
     valid_columns = {column.name for column in models.Reservation.__table__.columns}
 
     # Filter reservation data to include only valid fields
     filtered_reservation_data = {
-        key: value for key, value in data["data"].items() if key in valid_columns
+        key: value for key, value in reservation_obj.items() if key in valid_columns
     }
 
     try:
@@ -36,9 +36,9 @@ def create_reservation(data):
             raise  # Re-raise the exception if it's not a unique constraint violation
 
 
-def update_reservation(data):
+def update_reservation(reservation_obj):
     """Updates an existing reservation in the database"""
-    reservation_id = data["data"]["id"]
+    reservation_id = reservation_obj["id"]
     reservation = db.session.get(models.Reservation, reservation_id)
     if reservation:
         # Serialize only the relevant fields from the reservation instance
@@ -58,7 +58,7 @@ def update_reservation(data):
         db.session.add(reservation_revision)
 
         # Update reservation fields
-        for key, value in data["data"].items():
+        for key, value in reservation_obj.items():
             setattr(reservation, key, value)
         db.session.commit()
 

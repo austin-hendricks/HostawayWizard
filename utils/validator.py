@@ -75,7 +75,7 @@ def validate_hostaway_webhook_payload(payload):
         return False, f"Invalid event for {payload['object']}: {payload['event']}"
 
     # Validate data against models
-    isValidAgainstModel, msg = __validate_hostaway_payload_against_model(
+    isValidAgainstModel, msg = validate_hostaway_payload_against_model(
         payload["data"], payload["object"]
     )
     if not isValidAgainstModel:
@@ -84,7 +84,7 @@ def validate_hostaway_webhook_payload(payload):
     return True, "Valid payload"
 
 
-def __validate_hostaway_payload_against_model(data, object_type):
+def validate_hostaway_payload_against_model(data, object_type):
     """
     Validates that the data dictionary has the correct types and required fields
     according to the SQLAlchemy model.

@@ -10,6 +10,9 @@ def setup_logging():
     __initialize_logger("errors", level=logging.ERROR)
     __initialize_logger("warnings", level=logging.WARNING)
 
+    # Hostaway loggers
+    __initialize_logger("hostaway", level=logging.INFO)
+
     # Slack loggers
     __initialize_logger("slack", level=logging.INFO)
 
@@ -18,18 +21,24 @@ def log_inform(message, logger="general"):
     logging.getLogger(logger).info(message)
 
 
-def log_warning(message, logger="general"):
-    logging.getLogger(logger).info(
-        "Warning issued, see 'Warnings' log for details: https://gibbon-game-eagle.ngrok-free.app/logs/warnings"
-    )
-    logging.getLogger("warnings").warning(message)
+def log_warning(message, logger="general", bypass_standard=False):
+    if bypass_standard:
+        logging.getLogger(logger).warning(message)
+    else:
+        logging.getLogger(logger).info(
+            "Warning issued, see 'Warnings' log for details: https://gibbon-game-eagle.ngrok-free.app/logs/warnings"
+        )
+        logging.getLogger("warnings").warning(message)
 
 
-def log_error(message, logger="general"):
-    logging.getLogger(logger).info(
-        "Error issued, see 'Errors' log for details: https://gibbon-game-eagle.ngrok-free.app/logs/errors"
-    )
-    logging.getLogger("errors").error(message)
+def log_error(message, logger="general", bypass_standard=False):
+    if bypass_standard:
+        logging.getLogger(logger).error(message)
+    else:
+        logging.getLogger(logger).info(
+            "Error issued, see 'Errors' log for details: https://gibbon-game-eagle.ngrok-free.app/logs/errors"
+        )
+        logging.getLogger("errors").error(message)
 
 
 def __initialize_logger(logger_reference, fname=None, level=logging.INFO):
@@ -42,7 +51,7 @@ def __initialize_logger(logger_reference, fname=None, level=logging.INFO):
         f"logs/{fname}.log", maxBytes=100000, backupCount=5
     )
     log_handler.setLevel(level)
-    log_formatter = logging.Formatter("%(asctime)s - %(message)s")
+    log_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     log_handler.setFormatter(log_formatter)
 
     logging.getLogger(logger_reference).addHandler(log_handler)

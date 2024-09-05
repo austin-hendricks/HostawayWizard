@@ -8,16 +8,16 @@ import models
 from utils import notifier
 
 
-def create_task(data):
+def create_task(task_obj):
     """Creates a new task in the database"""
-    task_id = data["data"]["id"]
+    task_id = task_obj["id"]
 
     # Get a list of valid columns for the Task model
     valid_columns = {column.name for column in models.Task.__table__.columns}
 
     # Filter task data to include only valid fields
     filtered_task_data = {
-        key: value for key, value in data["data"].items() if key in valid_columns
+        key: value for key, value in task_obj.items() if key in valid_columns
     }
 
     # Create a new task entry
@@ -35,9 +35,9 @@ def create_task(data):
             raise  # Re-raise the exception if it's not a unique constraint violation
 
 
-def update_task(data):
+def update_task(task_obj):
     """Updates an existing task in the database"""
-    task_id = data["data"]["id"]
+    task_id = task_obj["id"]
 
     # Handle task updates and create a revision entry
     task = db.session.get(models.Task, task_id)
@@ -59,7 +59,7 @@ def update_task(data):
         db.session.add(task_revision)
 
         # Update task fields
-        for key, value in data["data"].items():
+        for key, value in task_obj.items():
             setattr(task, key, value)
         db.session.commit()
 
