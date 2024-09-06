@@ -1,5 +1,9 @@
+import os
+
 import logging
 from logging.handlers import RotatingFileHandler
+
+APP_STATIC_DOMAIN = os.getenv("APP_STATIC_DOMAIN", "http://localhost:5000")
 
 
 def setup_logging():
@@ -26,7 +30,7 @@ def log_warning(message, logger="general", bypass_standard=False):
         logging.getLogger(logger).warning(message)
     else:
         logging.getLogger(logger).info(
-            "Warning issued, see 'Warnings' log for details: https://gibbon-game-eagle.ngrok-free.app/logs/warnings"
+            f"Warning issued, see 'Warnings' log for details: {APP_STATIC_DOMAIN}/logs/warnings"
         )
         logging.getLogger("warnings").warning(message)
 
@@ -36,7 +40,7 @@ def log_error(message, logger="general", bypass_standard=False):
         logging.getLogger(logger).error(message)
     else:
         logging.getLogger(logger).info(
-            "Error issued, see 'Errors' log for details: https://gibbon-game-eagle.ngrok-free.app/logs/errors"
+            f"Error issued, see 'Errors' log for details: {APP_STATIC_DOMAIN}/logs/errors"
         )
         logging.getLogger("errors").error(message)
 

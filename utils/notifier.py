@@ -1,4 +1,8 @@
+import os
+
 from utils import logger, slackbot
+
+APP_STATIC_DOMAIN = os.getenv("APP_STATIC_DOMAIN", "http://localhost:5000")
 
 
 def inform(message, logger_name="general"):
@@ -16,7 +20,7 @@ def warn(message):
     """
     logger.log_warning(message)
     slackbot.message_channel(
-        "Warning issued, see 'Warnings' log for details: https://gibbon-game-eagle.ngrok-free.app/logs/warnings\n"
+        f"Warning issued, see 'Warnings' log for details: {APP_STATIC_DOMAIN}/logs/warnings\n"
     )
 
 
@@ -26,5 +30,5 @@ def error(message):
     """
     logger.log_error(message)
     slackbot.message_channel(
-        "Error issued, see 'Errors' log for details: https://gibbon-game-eagle.ngrok-free.app/logs/errors\n"
+        f"Error issued, see 'Errors' log for details: {APP_STATIC_DOMAIN}/logs/errors\n"
     )
