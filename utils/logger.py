@@ -16,6 +16,7 @@ def setup_logging():
 
     # Hostaway loggers
     __initialize_logger("hostaway", level=logging.INFO)
+    __initialize_logger("hostaway_data_sync", level=logging.INFO)
 
     # Slack loggers
     __initialize_logger("slack", level=logging.INFO)

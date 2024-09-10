@@ -8,7 +8,7 @@ import models
 from utils import notifier
 
 
-def create_task(task_obj):
+def create_task(task_obj, notifySuccess=True):
     """Creates a new task in the database"""
     task_id = task_obj["id"]
 
@@ -25,7 +25,8 @@ def create_task(task_obj):
         task = models.Task(**filtered_task_data)
         db.session.add(task)
         db.session.commit()
-        notifier.inform(f"Task created with ID: {task_id}")
+        if notifySuccess:
+            notifier.inform(f"Task created with ID: {task_id}")
 
     except IntegrityError as ie:
         db.session.rollback()
@@ -35,7 +36,7 @@ def create_task(task_obj):
             raise  # Re-raise the exception if it's not a unique constraint violation
 
 
-def update_task(task_obj):
+def update_task(task_obj, notifySuccess=True):
     """Updates an existing task in the database"""
     task_id = task_obj["id"]
 
@@ -62,8 +63,8 @@ def update_task(task_obj):
         for key, value in task_obj.items():
             setattr(task, key, value)
         db.session.commit()
-
-        notifier.inform(f"Task {task_id} updated")
+        if notifySuccess:
+            notifier.inform(f"Task {task_id} updated")
 
     else:
         notifier.error(f"Task update received for non-existent task ID: {task_id}")

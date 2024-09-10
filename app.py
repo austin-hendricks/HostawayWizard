@@ -9,7 +9,12 @@ load_dotenv()
 from db import db
 from config import Config
 from utils import logger, notifier
-from workers import jobs, hostaway_webhook_processor, slack_command_processor
+from workers import (
+    jobs,
+    hostaway_webhook_processor,
+    slack_command_processor,
+    reservation_sync_worker,
+)
 
 
 app = Flask(__name__)
@@ -29,6 +34,7 @@ logger.setup_logging()
 # Start Worker threads for asynchronous data processing
 hostaway_webhook_processor.start_worker(app)
 slack_command_processor.start_worker(app)
+reservation_sync_worker.start_worker(app)
 
 
 @app.route("/")

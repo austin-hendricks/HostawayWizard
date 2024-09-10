@@ -8,7 +8,7 @@ import models
 from utils import notifier
 
 
-def create_reservation(reservation_obj):
+def create_reservation(reservation_obj, notifySuccess=True):
     """Creates a new reservation in the database"""
     reservation_id = reservation_obj["id"]
 
@@ -24,7 +24,8 @@ def create_reservation(reservation_obj):
         reservation = models.Reservation(**filtered_reservation_data)
         db.session.add(reservation)
         db.session.commit()
-        notifier.inform(f"Reservation created with ID: {reservation_id}")
+        if notifySuccess:
+            notifier.inform(f"Reservation created with ID: {reservation_id}")
 
     except IntegrityError as ie:
         db.session.rollback()
@@ -36,7 +37,7 @@ def create_reservation(reservation_obj):
             raise  # Re-raise the exception if it's not a unique constraint violation
 
 
-def update_reservation(reservation_obj):
+def update_reservation(reservation_obj, notifySuccess=True):
     """Updates an existing reservation in the database"""
     reservation_id = reservation_obj["id"]
     reservation = db.session.get(models.Reservation, reservation_id)
@@ -62,7 +63,8 @@ def update_reservation(reservation_obj):
             setattr(reservation, key, value)
         db.session.commit()
 
-        notifier.inform(f"Reservation {reservation_id} updated")
+        if notifySuccess:
+            notifier.inform(f"Reservation {reservation_id} updated")
 
     else:
         notifier.error(

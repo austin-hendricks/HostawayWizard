@@ -6,7 +6,7 @@ import models
 from utils import notifier
 
 
-def create_conversation_message(message_obj):
+def create_conversation_message(message_obj, notifySuccess=True):
     """Creates a new conversationMessage in the database"""
     message_id = message_obj["id"]
 
@@ -40,9 +40,10 @@ def create_conversation_message(message_obj):
         )
         db.session.add(conversation_message)
         db.session.commit()
-        notifier.inform(
-            f"ConversationMessage received associated with Reservation {reservation_id}"
-        )
+        if notifySuccess:
+            notifier.inform(
+                f"ConversationMessage received associated with Reservation {reservation_id}"
+            )
     except IntegrityError as ie:
         db.session.rollback()
         if isinstance(ie.orig, UniqueViolation):
