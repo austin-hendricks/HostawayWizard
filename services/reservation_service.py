@@ -3,7 +3,7 @@ from psycopg2.errors import UniqueViolation
 
 from datetime import date, datetime
 
-from db import db
+from db import db_session
 import models
 from utils import notifier
 
@@ -22,13 +22,13 @@ def create_reservation(reservation_obj, notifySuccess=True):
 
     try:
         reservation = models.Reservation(**filtered_reservation_data)
-        db.session.add(reservation)
-        db.session.commit()
+        db_session.add(reservation)
+        db_session.commit()
         if notifySuccess:
             notifier.inform(f"Reservation created with ID: {reservation_id}")
 
     except IntegrityError as ie:
-        db.session.rollback()
+        db_session.rollback()
         if isinstance(ie.orig, UniqueViolation):
             notifier.warn(
                 f"Duplicate reservation creation for Reservation ID: {reservation_id}"
@@ -40,7 +40,7 @@ def create_reservation(reservation_obj, notifySuccess=True):
 def update_reservation(reservation_obj, notifySuccess=True):
     """Updates an existing reservation in the database"""
     reservation_id = reservation_obj["id"]
-    reservation = db.session.get(models.Reservation, reservation_id)
+    reservation = db_session.get(models.Reservation, reservation_id)
     if reservation:
         # Serialize only the relevant fields from the reservation instance
         reservation_revision_data = {
@@ -56,12 +56,12 @@ def update_reservation(reservation_obj, notifySuccess=True):
         reservation_revision = models.ReservationRevision(
             reservation_id=reservation.id, revision_data=reservation_revision_data
         )
-        db.session.add(reservation_revision)
+        db_session.add(reservation_revision)
 
         # Update reservation fields
         for key, value in reservation_obj.items():
             setattr(reservation, key, value)
-        db.session.commit()
+        db_session.commit()
 
         if notifySuccess:
             notifier.inform(f"Reservation {reservation_id} updated")

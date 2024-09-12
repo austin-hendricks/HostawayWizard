@@ -1,6 +1,6 @@
 from sqlalchemy import inspect
 
-from db import db
+from db import db_session
 import models
 from utils import logger, notifier, slackbot, hostaway_client, validator
 from services import reservation_service
@@ -23,7 +23,7 @@ def sync_reservations_with_hostaway():
     # Iterate through each reservation from Hostaway
     for hostaway_reservation in reservations:
         reservation_id = hostaway_reservation["id"]
-        local_reservation = db.session.get(models.Reservation, reservation_id)
+        local_reservation = db_session.get(models.Reservation, reservation_id)
 
         if not local_reservation:
             logger.log_inform(

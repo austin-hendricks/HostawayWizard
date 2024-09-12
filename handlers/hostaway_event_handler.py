@@ -1,6 +1,6 @@
 from services import task_service, reservation_service, message_service
 from utils import notifier, validator, hostaway_client
-from db import db
+from db import db_session
 import models
 
 
@@ -65,7 +65,7 @@ def __handle_conversation_message_event(message_obj):
 
 def __ensure_referenced_reservation_exists(reservation_id):
     """Ensures the referenced reservation exists in the database, polling Hostaway API if necessary"""
-    reservation = db.session.get(models.Reservation, reservation_id)
+    reservation = db_session.get(models.Reservation, reservation_id)
     if not reservation:
         notifier.inform(
             f"Data received for missing reservation {reservation_id}. Polling Hostaway API for reservation data...",

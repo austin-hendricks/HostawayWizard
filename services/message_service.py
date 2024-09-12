@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 from psycopg2.errors import UniqueViolation
 
-from db import db
+from db import db_session
 import models
 from utils import notifier
 
@@ -15,13 +15,13 @@ def create_conversation_message(message_obj, notifySuccess=True):
     reservation_id = message_obj["reservationId"]
 
     # Ensure the conversation exists
-    conversation = db.session.get(models.Conversation, conversation_id)
+    conversation = db_session.get(models.Conversation, conversation_id)
     if not conversation:
         conversation = models.Conversation(
             id=conversation_id, reservation_id=reservation_id
         )
-        db.session.add(conversation)
-        db.session.commit()
+        db_session.add(conversation)
+        db_session.commit()
 
     # Get a list of valid columns for the conversationMessage model
     valid_columns = {
@@ -38,14 +38,14 @@ def create_conversation_message(message_obj, notifySuccess=True):
         conversation_message = models.ConversationMessage(
             **filtered_conversationMessage_data
         )
-        db.session.add(conversation_message)
-        db.session.commit()
+        db_session.add(conversation_message)
+        db_session.commit()
         if notifySuccess:
             notifier.inform(
                 f"ConversationMessage received associated with Reservation {reservation_id}"
             )
     except IntegrityError as ie:
-        db.session.rollback()
+        db_session.rollback()
         if isinstance(ie.orig, UniqueViolation):
             notifier.warn(
                 f"Duplicate conversationMessage received for Reservation {reservation_id}. Duplicated conversationMessage ID: {message_id}"

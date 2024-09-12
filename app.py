@@ -6,7 +6,8 @@ from flask_migrate import Migrate
 # Load environment variables from .env file
 load_dotenv()
 
-from db import db
+import db as database
+from db import db, db_session
 from config import Config
 from utils import logger, notifier
 from workers import (
@@ -23,7 +24,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # Initialize SQLAlchemy
-db.init_app(app)
+database.initialize(app)
 
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
@@ -115,6 +116,14 @@ def get_log(log_type):
             ),
             500,
         )
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    """
+    Clean up the session at the end of each request or when the application context is torn down.
+    """
+    db_session.remove()  # Remove the session to ensure it is cleaned up
 
 
 if __name__ == "__main__":

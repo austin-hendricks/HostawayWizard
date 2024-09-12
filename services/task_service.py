@@ -3,7 +3,7 @@ from psycopg2.errors import UniqueViolation
 
 from datetime import date, datetime
 
-from db import db
+from db import db_session
 import models
 from utils import notifier
 
@@ -23,13 +23,13 @@ def create_task(task_obj, notifySuccess=True):
     # Create a new task entry
     try:
         task = models.Task(**filtered_task_data)
-        db.session.add(task)
-        db.session.commit()
+        db_session.add(task)
+        db_session.commit()
         if notifySuccess:
             notifier.inform(f"Task created with ID: {task_id}")
 
     except IntegrityError as ie:
-        db.session.rollback()
+        db_session.rollback()
         if isinstance(ie.orig, UniqueViolation):
             notifier.warn(f"Duplicate task creation for Task ID: {task_id}")
         else:
@@ -41,7 +41,7 @@ def update_task(task_obj, notifySuccess=True):
     task_id = task_obj["id"]
 
     # Handle task updates and create a revision entry
-    task = db.session.get(models.Task, task_id)
+    task = db_session.get(models.Task, task_id)
     if task:
         # Serialize only the relevant fields from the task instance
         task_revision_data = {
@@ -57,12 +57,12 @@ def update_task(task_obj, notifySuccess=True):
         task_revision = models.TaskRevision(
             task_id=task.id, revision_data=task_revision_data
         )
-        db.session.add(task_revision)
+        db_session.add(task_revision)
 
         # Update task fields
         for key, value in task_obj.items():
             setattr(task, key, value)
-        db.session.commit()
+        db_session.commit()
         if notifySuccess:
             notifier.inform(f"Task {task_id} updated")
 
