@@ -1,6 +1,5 @@
-import os
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, Response
+from flask import Flask
 from flask_migrate import Migrate
 
 # Load environment variables from .env file
@@ -8,9 +7,8 @@ load_dotenv()
 
 from db import db, db_session, initialize as initialize_db
 from config import Config
-from utils import logger, notifier
+from utils import logger
 from workers import (
-    jobs,
     hostaway_webhook_processor,
     slack_command_processor,
     reservation_sync_worker,
