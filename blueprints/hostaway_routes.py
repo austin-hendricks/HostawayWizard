@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from workers import jobs
 
-hostaway_bp = Blueprint("hostaway", __name__)
+hostaway_routes_bp = Blueprint("hostaway", __name__)
 
 
-@hostaway_bp.route("/hostaway/webhook", methods=["POST"])
+@hostaway_routes_bp.route("/hostaway/webhook", methods=["POST"])
 def receive_hostaway_webhook():
     if not request.is_json:
         return (

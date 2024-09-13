@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from workers import jobs
 
-slack_bp = Blueprint("slack", __name__)
+slack_routes_bp = Blueprint("slack", __name__)
 
 
-@slack_bp.route("/slack/slash/<command>", methods=["POST"])
+@slack_routes_bp.route("/slack/slash/<command>", methods=["POST"])
 def receive_slack_command(command):
     # Send payload to Slack Slash Command job queue
     jobs.slack_command_queue.put((command, request.form))

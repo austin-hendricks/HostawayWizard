@@ -2,10 +2,10 @@ import os
 from flask import Blueprint, jsonify, Response
 from utils import notifier
 
-logs_bp = Blueprint("logs", __name__)
+log_routes_bp = Blueprint("logs", __name__)
 
 
-@logs_bp.route("/logs/<log_type>", methods=["GET"])
+@log_routes_bp.route("/logs/<log_type>", methods=["GET"])
 def get_log(log_type):
     """
     Serve the specified log file content.
