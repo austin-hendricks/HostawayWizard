@@ -15,6 +15,7 @@ from workers import (
 )
 
 # Import blueprints
+from blueprints.home import home_bp
 from blueprints.hostaway_routes import hostaway_routes_bp
 from blueprints.slack_routes import slack_routes_bp
 from blueprints.log_routes import log_routes_bp
@@ -54,10 +55,7 @@ def create_app(config_class=Config):
 def register_routes(app):
     """Register all routes and endpoints with the given Flask app."""
 
-    @app.route("/")
-    def home():
-        return "<h1>HostawayWizard is the Future!</h1>"
-
+    app.register_blueprint(home_bp)
     app.register_blueprint(hostaway_routes_bp)
     app.register_blueprint(slack_routes_bp)
     app.register_blueprint(log_routes_bp)
