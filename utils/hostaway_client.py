@@ -3,12 +3,16 @@ import time
 import requests
 
 from utils import logger, validator
+from utils.rate_limiter import RateLimiter
 
 # Hostaway API credentials and base URL
 HOSTAWAY_API_KEY = os.getenv("HOSTAWAY_API_ACCESS_TOKEN")
 HOSTAWAY_BASE_URL = os.getenv("HOSTAWAY_API_BASE_URL")
 
 HOSTAWAY_MAX_RESERVATION_LIST_SIZE = 500
+
+# Hostaway's rate limit: 15 requests per 10 seconds = 1.5 requests per second
+hostaway_rate_limiter = RateLimiter(rate_limit_per_second=1.5)
 
 
 def get_headers():
@@ -31,6 +35,7 @@ def get_reservation(reservation_id, retries=3, backoff_factor=1):
 
     for attempt in range(retries):
         try:
+            hostaway_rate_limiter.wait_until_can_proceed()
             response = requests.get(
                 f"{HOSTAWAY_BASE_URL}/reservations/{reservation_id}", headers=headers
             )
@@ -86,6 +91,7 @@ def get_reservations(
 
     for attempt in range(retries):
         try:
+            hostaway_rate_limiter.wait_until_can_proceed()
             response = requests.get(
                 f"{HOSTAWAY_BASE_URL}/reservations?limit={limit}&offset={offset}&order={order}&channelId={channelId}&listingId={listingId}&arrivalStartDate={arrivalStartDate}&arrivalEndDate={arrivalEndDate}&departureStartDate={departureStartDate}&departureEndDate={departureEndDate}&hasUnreadConversationMessages={hasUnreadConversationMessages}",
                 headers=headers,
@@ -101,6 +107,8 @@ def get_reservations(
                 and lengthOfResponseArray == HOSTAWAY_MAX_RESERVATION_LIST_SIZE
             ):
                 offset += HOSTAWAY_MAX_RESERVATION_LIST_SIZE
+
+                hostaway_rate_limiter.wait_until_can_proceed()
                 next_response = requests.get(
                     f"{HOSTAWAY_BASE_URL}/reservations?limit={limit}&offset={offset}&order={order}&channelId={channelId}&listingId={listingId}&arrivalStartDate={arrivalStartDate}&arrivalEndDate={arrivalEndDate}&departureStartDate={departureStartDate}&departureEndDate={departureEndDate}&hasUnreadConversationMessages={hasUnreadConversationMessages}",
                     headers=headers,

@@ -5,7 +5,7 @@ from threading import Lock
 class RateLimiter:
     def __init__(self, rate_limit_per_second):
         self.rate_limit = rate_limit_per_second
-        self.allowance = rate_limit_per_second  # Start with the full allowance
+        self.allowance = 1.0  # Start with the full allowance
         self.last_check = time.monotonic()
         self.lock = (
             Lock()
@@ -21,13 +21,9 @@ class RateLimiter:
             self.allowance += time_passed * self.rate_limit
             self.last_check = current_time
 
-            # Ensure allowance does not exceed the rate limit
-            if self.allowance > self.rate_limit:
-                self.allowance = self.rate_limit
-
             # Check if there is enough allowance to proceed
             if self.allowance >= 1.0:
-                self.allowance -= 1.0
+                self.allowance = 0.0
                 return True
             return False
 
