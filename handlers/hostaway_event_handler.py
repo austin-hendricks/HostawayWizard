@@ -4,17 +4,19 @@ from db import db_session
 import models
 
 
-def handle_event(object_type, event_type, data):
+def handle_event(payload):
     """Handles Hostaway events"""
 
     # Validate the webhook payload
-    isValid, msg = validator.validate_hostaway_webhook_payload(data)
+    isValid, msg = validator.validate_hostaway_webhook_payload(payload)
     if not isValid:
         notifier.error(msg)
         return
 
-    # Extract the Hostaway data object for dispatching
-    obj = data["data"]
+    # Extract data for dispatching
+    object_type = payload["object"]
+    event_type = payload["event"]
+    obj = payload["data"]
 
     # Dispatch the event to the appropriate handler function
     if object_type == "task":

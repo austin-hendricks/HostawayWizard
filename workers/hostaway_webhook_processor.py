@@ -19,12 +19,13 @@ def worker(app):
                 if payload is None:  # Exit the worker if a None payload is received
                     break
 
-                # Extract the relevant fields from the webhook payload
-                object_type = payload["object"]
-                event_type = payload["event"]
+                if (
+                    str(payload) == "{'data': 'test'}"
+                ):  # Ignore test payload during webhook registration event
+                    break
 
                 # Send to Hostaway event handler
-                hostaway_event_handler.handle_event(object_type, event_type, payload)
+                hostaway_event_handler.handle_event(payload)
 
             except Exception as e:
                 notifier.error(
