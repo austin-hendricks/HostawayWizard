@@ -1,17 +1,19 @@
 from dotenv import load_dotenv
 from flask import Flask
 from flask_migrate import Migrate
+import atexit
 
 # Load environment variables from .env file
 load_dotenv()
 
 from db import db, db_session, initialize as initialize_db
 from config import Config
-from utils import logger
+from utils import logger, hostaway_webhook_manager
 from workers import (
     hostaway_webhook_processor,
     slack_command_processor,
     reservation_sync_worker,
+    webhook_registration_thread,
 )
 
 # Import blueprints
@@ -41,6 +43,9 @@ def create_app(config_class=Config):
     # Start worker threads for asynchronous data processing
     start_worker_threads(app)
 
+    # Deregister webhook when the app shuts down
+    atexit.register(hostaway_webhook_manager.deregister_all_unified_webhooks)
+
     # Register teardown function
     @app.teardown_appcontext
     def shutdown_session(exception=None):
@@ -66,6 +71,7 @@ def start_worker_threads(app):
     hostaway_webhook_processor.start_worker(app)
     slack_command_processor.start_worker(app)
     reservation_sync_worker.start_worker(app)
+    webhook_registration_thread.start(app)
 
 
 if __name__ == "__main__":
