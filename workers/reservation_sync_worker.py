@@ -8,6 +8,13 @@ from utils import notifier
 def worker(app):
     """Worker that runs the reservation sync process daily at midnight."""
     with app.app_context():
+        # Sync reservations once at application startup
+        try:
+            reservation_sync_service.sync_reservations_with_hostaway()
+        except Exception as e:
+            notifier.error(f"Failed to sync reservations: {str(e)}")
+
+        # Sync reservations daily at midnight
         while True:
             current_time = time.strftime("%H:%M")
             if current_time == "00:00":

@@ -68,10 +68,10 @@ def register_routes(app):
 
 def start_worker_threads(app):
     """Start worker threads for asynchronous data processing."""
+    webhook_registration_thread.start(app)
     hostaway_webhook_processor.start_worker(app)
     slack_command_processor.start_worker(app)
     reservation_sync_worker.start_worker(app)
-    webhook_registration_thread.start(app)
 
 
 if __name__ == "__main__":
