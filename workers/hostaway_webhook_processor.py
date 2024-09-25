@@ -1,6 +1,6 @@
 from threading import Thread
 
-from utils import notifier
+from utils import notifier, logger
 from workers.jobs import hostaway_webhook_queue
 from handlers import hostaway_event_handler
 
@@ -22,7 +22,10 @@ def worker(app):
                 if (
                     str(payload) == "{'data': 'test'}"
                 ):  # Ignore test payload during webhook registration event
-                    break
+                    logger.log_inform(
+                        "Test payload received. Ignoring...", logger="hostaway"
+                    )
+                    continue
 
                 # Send to Hostaway event handler
                 hostaway_event_handler.handle_event(payload)
